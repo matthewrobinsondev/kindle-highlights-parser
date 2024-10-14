@@ -1,0 +1,10 @@
+Sandworm (Greenberg, Andy)
+- Your Highlight on page 305 | location 4933-4934 | Added on Monday, 6 May 2024 19:53:44
+
+Put more simply, a complex system like a digitized civilization is subject to cascading failures, where one thing depends on another, which depends on another thing.
+==========
+Modern Software Engineering (Farley, David)
+- Your Highlight on page 26 | location 784-785 | Added on Sunday, 12 May 2024 09:50:49
+
+If we add more people to speed up development, we will increase the communication overhead, coupling, and complexity, all of which will slow us down.
+==========
