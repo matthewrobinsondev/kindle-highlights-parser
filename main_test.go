@@ -8,6 +8,7 @@ import (
 )
 
 const CLIPPINGS_FILE_PATH = "testData/Test Clippings.txt"
+const STRANGE_CLIPPINGS_FILE_PATH = "testData/Strange Title Clippings.txt"
 const FORMATTED_MARKDOWN_FILE_PATH = "testData/SandwormFormatted.md"
 
 func TestParseClippings(t *testing.T) {
@@ -28,6 +29,23 @@ func TestParseClippings(t *testing.T) {
 	assert.Equal(1, len(highlights["Modern Software Engineering"]), "There should be one highlight for this book")
 	assert.Equal("Put more simply, a complex system like a digitized civilization is subject to cascading failures, where one thing depends on another, which depends on another thing.", highlights["Sandworm"][0].Text)
 	assert.Equal("Greenberg, Andy", highlights["Sandworm"][0].Author)
+}
+
+func TestStrangBooknameCanBeParsed(t *testing.T) {
+	assert := assert.New(t)
+
+	if _, err := os.Stat(STRANGE_CLIPPINGS_FILE_PATH); os.IsNotExist(err) {
+		t.Fatalf("Test file not found: %v", err)
+	}
+
+	highlights, err := ParseClippings(STRANGE_CLIPPINGS_FILE_PATH)
+
+	if err != nil {
+		t.Errorf("Unexpected error parising clippings")
+	}
+
+	assert.Equal(1, len(highlights), "There should be a singular highlights")
+	assert.Equal(2, len(highlights["Sandworm"]), "There should be two highlights for this book")
 }
 
 func TestFormatMarkdown(t *testing.T) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -62,6 +63,8 @@ func main() {
 		markdown := FormatMarkdownForFile(clippings)
 		file.WriteString(markdown)
 	}
+
+	fmt.Print("Your notes have now been processed.\n")
 }
 
 func ParseClippings(filename string) (map[string][]Highlight, error) {
@@ -88,12 +91,21 @@ func createHighlights(lines []string) map[string][]Highlight {
 	var currentHighlight Highlight
 
 	title := regexp.MustCompile(`^(.*) \((.*)\)$`)
+
+	var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
+
 	metaData := regexp.MustCompile(`Your Highlight.*page ([0-9]+) .*location ([0-9-]+) \| Added on (.*)`)
 
 	for i := 0; i < len(lines); i++ {
 		line := lines[i]
 		if title.MatchString(line) {
 			match := title.FindStringSubmatch(line)
+
+			// Had to add this due to finding some encoded bytes in the clippings file in titles
+			byteText := []byte(match[1])
+			if bytes.HasPrefix(byteText, utf8BOM) {
+				match[1] = string(byteText[len(utf8BOM):])
+			}
 
 			currentHighlight.Title = match[1]
 			currentHighlight.Author = match[2]
