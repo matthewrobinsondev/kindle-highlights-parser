@@ -40,7 +40,6 @@ func TestFormatMarkdown(t *testing.T) {
 	result := FormatMarkdownForFile(highlights["Sandworm"])
 
 	file, err := os.ReadFile(FORMATTED_MARKDOWN_FILE_PATH)
-
 	if err != nil {
 		t.Fatalf("Formatted markdown example not found: %v", err)
 	}
