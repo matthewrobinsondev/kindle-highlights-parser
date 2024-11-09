@@ -1,0 +1,2 @@
+- Put more simply, a complex system like a digitized civilization is subject to cascading failures, where one thing depends on another, which depends on another thing. (Page: 305)
+- Test (Page: 305)

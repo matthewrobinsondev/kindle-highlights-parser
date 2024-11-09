@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -21,14 +22,21 @@ func main() {
 	books, err := ParseClippings("My Clippings.txt")
 
 	if err != nil {
-		fmt.Errorf("Unexpected error: %w", err)
+		fmt.Printf("Unexpected error: %v\n", err)
 		os.Exit(1)
 	}
 
-	for title, highlights := range books {
-		// Check to see if file exists already
-		// Create file for title
-		// Format highlights into MD and write to file
+	for title, clippings := range books {
+		// TODO: phase one implementation, ideally we refactor to do sepeate logic for editing existing files vs creating new ones
+		file, err := os.OpenFile(title, os.O_RDWR|os.O_CREATE, 0666)
+
+		if err != nil {
+			log.Fatalf("Unexpected error opening file: %v", err)
+		}
+
+		markdown := FormatMarkdownForFile(clippings)
+
+		file.WriteString(markdown)
 	}
 }
 
@@ -48,6 +56,10 @@ func ParseClippings(filename string) (map[string][]Highlight, error) {
 		lines = append(lines, scanner.Text())
 	}
 
+	return createHighlights(lines), nil
+}
+
+func createHighlights(lines []string) map[string][]Highlight {
 	highlights := make(map[string][]Highlight)
 	var currentHighlight Highlight
 
@@ -83,10 +95,21 @@ func ParseClippings(filename string) (map[string][]Highlight, error) {
 		}
 	}
 
-	return highlights, nil
+	return highlights
 }
 
-func WriteMarkdown(highlights map[string][]Highlight) error {
+// TODO: one to come back to can I esentially format further to be by paragraphs using page numbers?
+func FormatMarkdownForFile(highlights []Highlight) string {
+	var markdown strings.Builder
 
-	return nil
+	for _, highlight := range highlights {
+		markdown.WriteString(fmt.Sprintf("- %s (Page: %s)\n", highlight.Text, highlight.Page))
+	}
+
+	return markdown.String()
 }
+
+//
+// func WriteMetaData(title string, file *os.File) error {
+// 	return nil
+// }
