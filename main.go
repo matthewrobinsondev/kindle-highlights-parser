@@ -7,6 +7,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 type Highlight struct {
@@ -19,23 +21,45 @@ type Highlight struct {
 }
 
 func main() {
-	books, err := ParseClippings("My Clippings.txt")
+	viper.SetConfigName("config")
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
 
+	if err != nil {
+		fmt.Printf("Errored reading config: %v", err)
+		os.Exit(1)
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Printf("Error loading home directory: %v", err)
+		os.Exit(1)
+	}
+
+	books, err := ParseClippings("My Clippings.txt")
 	if err != nil {
 		fmt.Printf("Unexpected error: %v\n", err)
 		os.Exit(1)
 	}
 
+	if !viper.IsSet("notes_directory") {
+		fmt.Println("Please add notes_directory to your config")
+	}
+
+	notesDirectory := viper.GetString("notes_directory")
+
+	// TODO: Revist this once complete to look into speeding up with concurency
 	for title, clippings := range books {
 		// TODO: phase one implementation, ideally we refactor to do sepeate logic for editing existing files vs creating new ones
-		file, err := os.OpenFile(title, os.O_RDWR|os.O_CREATE, 0666)
+		filename := fmt.Sprintf("%s/%s/%s.md", homeDir, notesDirectory, title)
+		file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0666)
 
 		if err != nil {
 			log.Fatalf("Unexpected error opening file: %v", err)
 		}
 
 		markdown := FormatMarkdownForFile(clippings)
-
 		file.WriteString(markdown)
 	}
 }
@@ -103,13 +127,9 @@ func FormatMarkdownForFile(highlights []Highlight) string {
 	var markdown strings.Builder
 
 	for _, highlight := range highlights {
+		// TODO: Using bytes is probably the way to go but quicker to do what I already know
 		markdown.WriteString(fmt.Sprintf("- %s (Page: %s)\n", highlight.Text, highlight.Page))
 	}
 
 	return markdown.String()
 }
-
-//
-// func WriteMetaData(title string, file *os.File) error {
-// 	return nil
-// }
