@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"fmt"
@@ -7,11 +7,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/matthewrobinsdev/kindle-notes-parser/pkg/models"
 )
 
-const CLIPPINGS_FILE_PATH = "testData/Test Clippings.txt"
-const STRANGE_CLIPPINGS_FILE_PATH = "testData/Strange Title Clippings.txt"
-const FORMATTED_MARKDOWN_FILE_PATH = "testData/SandwormFormatted.md"
+const CLIPPINGS_FILE_PATH = "../../testData/Test Clippings.txt"
+const STRANGE_CLIPPINGS_FILE_PATH = "../../testData/Strange Title Clippings.txt"
+const FORMATTED_MARKDOWN_FILE_PATH = "../../testData/SandwormFormatted.md"
 
 func TestParseClippings(t *testing.T) {
 	assert := assert.New(t)
@@ -20,7 +22,7 @@ func TestParseClippings(t *testing.T) {
 		t.Fatalf("Test file not found: %v", err)
 	}
 
-	highlights, err := parseClippings(CLIPPINGS_FILE_PATH)
+	highlights, err := ParseClippings(CLIPPINGS_FILE_PATH)
 
 	if err != nil {
 		t.Errorf("Unexpected error parsing clippings")
@@ -41,14 +43,15 @@ func TestParseClippings(t *testing.T) {
 	assert.Equal(2, sandwormCount, "There should be two highlights for Sandworm")
 	assert.Equal(1, modernSoftwareCount, "There should be one highlight for Modern Software Engineering")
 
-	var sandwormHighlight Highlight
+	var sandwormHighlight *models.Highlight
 	for _, highlight := range highlights {
 		if highlight.Title == "Sandworm" {
-			sandwormHighlight = highlight
+			sandwormHighlight = &highlight
 			break
 		}
 	}
 
+	assert.NotNil(sandwormHighlight, "Should find a Sandworm highlight")
 	assert.Equal("Put more simply, a complex system like a digitized civilization is subject to cascading failures, where one thing depends on another, which depends on another thing.", sandwormHighlight.Text)
 	assert.Equal("Greenberg, Andy", sandwormHighlight.Author)
 }
@@ -60,7 +63,7 @@ func TestStrangBooknameCanBeParsed(t *testing.T) {
 		t.Fatalf("Test file not found: %v", err)
 	}
 
-	highlights, err := parseClippings(STRANGE_CLIPPINGS_FILE_PATH)
+	highlights, err := ParseClippings(STRANGE_CLIPPINGS_FILE_PATH)
 
 	if err != nil {
 		t.Errorf("Unexpected error parsing clippings")
@@ -77,13 +80,13 @@ func TestStrangBooknameCanBeParsed(t *testing.T) {
 }
 
 func TestFormatMarkdown(t *testing.T) {
-	highlights, err := parseClippings(CLIPPINGS_FILE_PATH)
+	highlights, err := ParseClippings(CLIPPINGS_FILE_PATH)
 
 	if err != nil {
 		t.Errorf("Unexpected error parsing clippings")
 	}
 
-	var sandwormHighlights []Highlight
+	var sandwormHighlights []models.Highlight
 	for _, highlight := range highlights {
 		if highlight.Title == "Sandworm" {
 			sandwormHighlights = append(sandwormHighlights, highlight)
@@ -102,7 +105,7 @@ func TestFormatMarkdown(t *testing.T) {
 	assert.Equal(s, result, "Sandworm markdown should match")
 }
 
-func formatMarkdownForFile(highlights []Highlight) string {
+func formatMarkdownForFile(highlights []models.Highlight) string {
 	var markdown strings.Builder
 
 	for _, highlight := range highlights {
