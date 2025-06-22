@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/matthewrobinsdev/kindle-notes-parser/internal/config"
+	"github.com/matthewrobinsdev/kindle-notes-parser/internal/exporter"
 	"github.com/matthewrobinsdev/kindle-notes-parser/internal/parser"
 	"github.com/matthewrobinsdev/kindle-notes-parser/pkg/models"
 )
@@ -17,6 +18,7 @@ type Model struct {
 	cursor   int
 	selected map[string]bool // key: "book:highlight" format
 	config   *config.Config
+	exporter *exporter.Service
 }
 
 var (
@@ -56,6 +58,7 @@ func NewModel(clippingsFile string) *Model {
 		items:    items,
 		selected: make(map[string]bool),
 		config:   cfg,
+		exporter: exporter.New(cfg),
 	}
 }
 
