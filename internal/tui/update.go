@@ -30,7 +30,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				// Toggle highlight selection
 				key := fmt.Sprintf("%d:%d", currentItem.BookIndex, currentItem.HighlightIndex)
-				m.selected[key] = !m.selected[key]
+				if m.selected[key] {
+					delete(m.selected, key)
+				} else {
+					m.selected[key] = true
+				}
 			}
 		case "a":
 			// Select all highlights under current book
@@ -55,6 +59,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			return m, m.exportSelected()
 		}
+	case ExportCompleteMsg:
+		return m, tea.Quit
 	}
 	return m, nil
 }

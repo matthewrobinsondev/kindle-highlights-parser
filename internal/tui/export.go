@@ -3,14 +3,15 @@ package tui
 import (
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/matthewrobinsdev/kindle-notes-parser/pkg/models"
 )
+
+type ExportCompleteMsg struct {
+	Results []models.ExportResult
+}
 
 func (m *Model) exportSelected() tea.Cmd {
 	return func() tea.Msg {
@@ -30,29 +31,13 @@ func (m *Model) exportSelected() tea.Cmd {
 			}
 		}
 
-		for title, highlights := range bookHighlights {
-			if err := m.saveHighlights(title, highlights); err != nil {
-				log.Printf("Error saving highlights for %s: %v", title, err)
-			}
+		results, err := m.exporter.ExportHighlights(bookHighlights)
+		if err != nil {
+			log.Printf("Error exporting highlights: %v", err)
+			return ExportCompleteMsg{Results: []models.ExportResult{}}
 		}
 
-		return tea.Quit()
+		return ExportCompleteMsg{Results: results}
 	}
 }
 
-func (m *Model) saveHighlights(title string, highlights []models.Highlight) error {
-	filename := filepath.Join(m.config.HomeDir, m.config.NotesDirectory, title+".md")
-
-	if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
-		return err
-	}
-
-	var content strings.Builder
-	content.WriteString(fmt.Sprintf("# %s\n\n", title))
-
-	for _, highlight := range highlights {
-		content.WriteString(fmt.Sprintf("- %s (Page: %s)\n", highlight.Text, highlight.Page))
-	}
-
-	return os.WriteFile(filename, []byte(content.String()), 0644)
-}
