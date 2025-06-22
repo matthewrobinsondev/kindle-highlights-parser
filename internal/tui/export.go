@@ -40,4 +40,3 @@ func (m *Model) exportSelected() tea.Cmd {
 		return ExportCompleteMsg{Results: results}
 	}
 }
-

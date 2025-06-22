@@ -273,4 +273,3 @@ func TestExportHighlightsWithMockFS(t *testing.T) {
 	assert.Contains(t, content, "- First highlight (Page: 1)")
 	assert.Contains(t, content, "- Second highlight (Page: 2)")
 }
-

@@ -236,4 +236,3 @@ func (s *Service) createHighlightKey(highlight models.Highlight) string {
 func (s *Service) buildHighlightKey(text, page string) string {
 	return text + keySeparator + page
 }
-
